@@ -1,0 +1,101 @@
+image: node:14-alpine
+
+stages:
+  - images
+  - dependencies
+  - lint
+  - test
+  - transpilation
+  - release
+  - deploy
+
+# cache:
+#     paths:
+#         - node_modules/
+#         - example/node_modules/
+
+# Builds the helper image needed
+# by semantic release and git related operations
+build docker image:
+  stage: images
+  image:
+    name: docker/compose:1.21.2
+    entrypoint: ["/bin/sh", "-c"]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  services:
+    - docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker-compose build
+    - docker-compose push
+  when: manual
+
+commit lint:
+  stage: lint
+  script:
+    - export PREVIOUS_HEAD=`git rev-parse --short HEAD^`
+    - echo $PREVIOUS_HEAD
+    - npx commitlint --from=$PREVIOUS_HEAD --to=$CI_COMMIT_SHA
+
+dependencies:lib:
+  stage: dependencies
+  script:
+    - npm install
+  artifacts:
+    paths:
+      - node_modules
+    expire_in: 2 hours
+
+test:lib:
+  stage: test
+  script:
+    - CI=true npm run coverage
+  # Display coverage in GitLab
+  coverage: '/^All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  artifacts:
+    paths:
+      - coverage
+    expire_in: 2 hours
+
+transpile typescript:
+  stage: transpilation
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - dist
+    expire_in: 2 hours
+
+release:
+  image: "${CI_REGISTRY_IMAGE}/builder"
+  stage: release
+  dependencies:
+    - dependencies:lib
+    - transpile typescript
+  before_script:
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - git config --global user.email "2418867-StraightOuttaCrompton@users.noreply.gitlab.com"
+    - git config --global user.name "StraightOuttaCrompton"
+    - mkdir -p ~/.ssh
+    - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - git checkout -B "$CI_BUILD_REF_NAME" "$CI_BUILD_REF"
+    - npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
+  script:
+    - npx semantic-release --debug
+
+pages:
+  stage: deploy
+  variables:
+    PUBLIC_URL: "/react-sp-cards-slider-example"
+  script:
+    - CI=true npm run predeploy
+    - mv example/build public
+    - cp public/index.html public/404.html
+  artifacts:
+    paths:
+      - public # GitLab pages serve from a 'public' directory
+  only:
+    - master # run on master branch

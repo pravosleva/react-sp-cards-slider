@@ -1,0 +1,8 @@
+version: "3"
+services:
+  builder:
+    image: "${CI_REGISTRY_IMAGE-local}/builder"
+    build:
+      context: builder
+      args:
+        node_version: "13.3.0"
