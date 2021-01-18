@@ -2,7 +2,7 @@
 
 ## Demo
 
-![demo-0](,/_demo/demo-0.gif?raw=true)
+![demo-0](./_demo/demo-0.gif?raw=true)
 
 ## Install
 
