@@ -2,7 +2,7 @@
 
 ## Demo
 
-![demo-0](https://github.com/pravosleva/react-sp-cards-slider/blob/master/_demo-0.gif?raw=true)
+![demo-0](,/_demo/demo-0.gif?raw=true)
 
 ## Install
 
@@ -94,7 +94,7 @@ breakpoints={{
 }}
 ```
 
-![demo-2](https://github.com/pravosleva/react-sp-cards-slider/blob/master/_demo-2.gif?raw=true)
+![demo-2](./_demo/demo-2.gif?raw=true)
 
 ## Or full width
 
@@ -108,7 +108,7 @@ breakpoints={{
 }}
 ```
 
-![demo-4](https://github.com/pravosleva/react-sp-cards-slider/blob/master/_demo-4.gif?raw=true)
+![demo-4](./_demo/demo-4.gif?raw=true)
 
 [![NPM](https://img.shields.io/npm/v/example-typescript-react-component-library.svg)](https://www.npmjs.com/package/example-typescript-react-component-library) [![LICENSE](https://img.shields.io/npm/l/example-typescript-react-component-library.svg?color=green)](https://www.npmjs.com/package/example-typescript-react-component-library)
 
